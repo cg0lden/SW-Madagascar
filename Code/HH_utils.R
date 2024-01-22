@@ -1,5 +1,5 @@
 ################################################################################
-# Code: Import HH Data
+# Code: HH_utils
 # Date: 1/4/2024
 #
 # Programmer: Emma Crenshaw
@@ -104,6 +104,10 @@ load_ARMSData <- function(dd_file, list_files, timepoint){
              member_new_repeat + animal_repeat + salary_repeat +
              crops_repeat + wage_repeat + main) #sum to make sure the variable is unique (these should all equal 1)
   
+  # Check the sum variable
+  if (length(df_sets3$vars[df_sets3$sum_ds != 1]) != 0) {
+    stop("Uncategorized excel sheet")
+  }
   
   # Create a loop that uses the variable sets and hallmark variables to define "groups" of datasets all all contain the same variables and should be stacked
   string_groups <- list()
@@ -153,9 +157,19 @@ load_ARMSData <- function(dd_file, list_files, timepoint){
         }
         
         # Use eval and parse to dynamically set the variable type in data
+        na_before = sum(is.na(dataset[[var_name]])) # check number of NA values before variable type change
+        
         if (var_type == "datetime"){dataset[[var_name]] <- eval(parse(text =paste0("as_",var_type,"(dataset[[var_name]])")))}
         else {dataset[[var_name]] <- eval(parse(text =paste0("as.",var_type,"(dataset[[var_name]])")))}
         
+        na_after = sum(is.na(dataset[[var_name]])) # check number of NA values after variable type change
+        
+        if(na_before < na_after){ #if the variable type change created new NA values, print the data sheet and variable
+          print("New Coerced NA values")
+          print(var_name)
+          print(dataset_name)
+          print(var_type)
+        }
       }
       return(dataset)
     }) %>%
