@@ -1,5 +1,5 @@
 ################################################################################
-# Code: Import HH Data
+# Code: HH_processing
 # Date: 1/4/2024
 #
 # Programmer: Emma Crenshaw
@@ -72,6 +72,9 @@ F1F2data <- load_ARMSData(dd_file, list_files, timepoint)
 
 #!IMPORTANT! At this step, make sure there are only 9 datasets in the list (one per group). If there are more, 
 # it means that they had different variables. Confirm why below before combining:
+if (length(unique(names(F1F2data))) != length(names(F1F2data))){
+  warning("Lists are not unique")
+}
 
 # Look at why the crops_repeat datasets and main datasets aren't being seen as 'the same'
 var_crop1 <- ls(F1F2data[[7]])
@@ -111,6 +114,10 @@ timepoint = "F3"
 
 F3data <- load_ARMSData(dd_file, list_files, timepoint) #9 datasets, good to go
 
+if (length(unique(names(F1F2data))) != length(names(F1F2data))){
+  warning("Lists are not unique")
+}
+
 # Bring the datasets into the global environment
 list2env(F3data, envir = .GlobalEnv)
 
@@ -129,6 +136,10 @@ list_files = c("Raw\\F4\\madeleine_hh_1023.xlsx", "Raw\\F4\\eric_hh_1023.xlsx", 
 timepoint = "F4"
 
 F4data <- load_ARMSData(dd_file, list_files, timepoint) #9 datasets, good to go
+
+if (length(unique(names(F1F2data))) != length(names(F1F2data))){
+  warning("Lists are not unique")
+}
 
 # Bring the datasets into the global environment
 list2env(F4data, envir = .GlobalEnv)
