@@ -45,12 +45,10 @@
 library(tidyverse)
 library(readxl)
 library(stringr)
-
-# Set working directory - UPDATE FOR EACH USER
-setwd("C:\\Users\\emmcr\\Documents\\ARMS_Golden\\HHData")
+library(here)
 
 # Load utilities
-source("C:\\Users\\emmcr\\Documents\\ARMS_Golden\\Code\\HH_utils.R")
+source(here("Code", "HH_utils.R"))
 
 ###################################################
 ###################################################
@@ -59,10 +57,11 @@ source("C:\\Users\\emmcr\\Documents\\ARMS_Golden\\Code\\HH_utils.R")
 ###################################################
 
 # File locations
-dd_file = "Raw\\HH_DataDictionary.xlsx"
+dd_file = here("Data Dictionary","HH_DataDictionary.xlsx")
 
-list_files = c("Raw\\F1F2\\madeleine_hh_april.xlsx", "Raw\\F1F2\\eric_hh_april.xlsx", "Raw\\F1F2\\marc_hh_april.xlsx", 
-               "Raw\\F1F2\\romario_hh_april.xlsx", "Raw\\F1F2\\andrea_hh_april.xlsx")
+list_files = c(here("HHData", "Raw","F1F2","madeleine_hh_april.xlsx"), here("HHData", "Raw","F1F2","eric_hh_april.xlsx"), 
+               here("HHData", "Raw","F1F2","marc_hh_april.xlsx"), 
+               here("HHData", "Raw","F1F2","romario_hh_april.xlsx"), here("HHData", "Raw","F1F2","andrea_hh_april.xlsx"))
 
 # Variable to indicate the time point of data, used to name the files below
 timepoint = "F1F2"
@@ -105,16 +104,17 @@ list2env(F1F2data, envir = .GlobalEnv)
 ###################################################
 ###################################################
 
-dd_file = "Raw\\HH_DataDictionary.xlsx"
+dd_file = here("Data Dictionary","HH_DataDictionary.xlsx")
 
-list_files = c("Raw\\F3\\madeleine_hh_0723.xlsx", "Raw\\F3\\eric_hh_0723.xlsx", "Raw\\F3\\marc_hh_0723.xlsx", 
-               "Raw\\F3\\romario_hh_0723.xlsx", "Raw\\F3\\mahefa_hh_0723.xlsx")
+list_files = c(here("HHData", "Raw","F3","madeleine_hh_0723.xlsx"), here("HHData", "Raw","F3","eric_hh_0723.xlsx"),
+               here("HHData", "Raw","F3","marc_hh_0723.xlsx"), here("HHData", "Raw","F3","romario_hh_0723.xlsx"), 
+               here("HHData", "Raw","F3","mahefa_hh_0723.xlsx"))
 
 timepoint = "F3"
 
 F3data <- load_ARMSData(dd_file, list_files, timepoint) #9 datasets, good to go
 
-if (length(unique(names(F1F2data))) != length(names(F1F2data))){
+if (length(unique(names(F3data))) != length(names(F3data))){
   warning("Lists are not unique")
 }
 
@@ -128,10 +128,11 @@ list2env(F3data, envir = .GlobalEnv)
 ###################################################
 ###################################################
 
-dd_file = "Raw\\HH_DataDictionary.xlsx"
+dd_file = here("Data Dictionary","HH_DataDictionary.xlsx")
 
-list_files = c("Raw\\F4\\madeleine_hh_1023.xlsx", "Raw\\F4\\eric_hh_1023.xlsx", "Raw\\F4\\marc_hh_1023.xlsx", 
-               "Raw\\F4\\romario_hh_1023.xlsx", "Raw\\F4\\mahefa_hh_1023.xlsx")
+list_files = c(here("HHData", "Raw","F4","madeleine_hh_1023.xlsx"), here("HHData", "Raw","F4","eric_hh_1023.xlsx"),
+               here("HHData", "Raw","F4","marc_hh_1023.xlsx"), 
+               here("HHData", "Raw","F4","romario_hh_1023.xlsx"), here("HHData", "Raw","F4","mahefa_hh_1023.xlsx"))
 
 timepoint = "F4"
 
@@ -161,12 +162,12 @@ wage_repeat = bind_rows(F1F2_wage_repeat, F3_wage_repeat, F4_wage_repeat)
 member_new_repeat = bind_rows(F1F2_member_new_repeat, F3_member_new_repeat, F4_member_new_repeat)
 member_left_repeat = bind_rows(F1F2_member_left_repeat, F3_member_left_repeat, F4_member_left_repeat)
 
-save(main, file = "main.RData")
-save(absent_repeat, file = "absent_repeat.RData")
-save(animal_repeat, file = "animal_repeat.RData")
-save(crops_repeat, file = "crops_repeat.RData")
-save(income_repeat, file = "income_repeat.RData")
-save(salary_repeat, file = "salary_repeat.RData")
-save(wage_repeat, file = "wage_repeat.RData")
-save(member_new_repeat, file = "member_new_repeat.RData")
-save(member_left_repeat, file = "member_left_repeat.RData")
+save(main, file = here("HHData", "main.RData"))
+save(absent_repeat, file = here("HHData", "absent_repeat.RData"))
+save(animal_repeat, file = here("HHData", "animal_repeat.RData"))
+save(crops_repeat, file = here("HHData", "crops_repeat.RData"))
+save(income_repeat, file = here("HHData", "income_repeat.RData"))
+save(salary_repeat, file = here("HHData", "salary_repeat.RData"))
+save(wage_repeat, file = here("HHData", "wage_repeat.RData"))
+save(member_new_repeat, file = here("HHData", "member_new_repeat.RData"))
+save(member_left_repeat, file = here("HHData", "member_left_repeat.RData"))

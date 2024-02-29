@@ -35,12 +35,10 @@
 library(tidyverse)
 library(readxl)
 library(stringr)
-
-# Set working directory - UPDATE FOR EACH USER
-setwd("C:\\Users\\emmcr\\Documents\\ARMS_Golden\\IndData")
+library(here)
 
 # Load utilities
-source("C:\\Users\\emmcr\\Documents\\ARMS_Golden\\Code\\Ind_utils.R")
+source(here("Code", "Ind_utils.R"))
 
 ###################################################
 ###################################################
@@ -49,10 +47,11 @@ source("C:\\Users\\emmcr\\Documents\\ARMS_Golden\\Code\\Ind_utils.R")
 ###################################################
 
 # File locations
-dd_file = "C:\\Users\\emmcr\\Documents\\ARMS_Golden\\Data Dictionary\\Ind_DataDictionary.xlsx"
+dd_file = here("Data Dictionary","Ind_DataDictionary.xlsx")
 
-list_files = c("Raw\\F1F2\\madeleine_ind_april.xlsx", "Raw\\F1F2\\eric_ind_april.xlsx", "Raw\\F1F2\\marc_ind_april.xlsx", 
-               "Raw\\F1F2\\romario_ind_april.xlsx", "Raw\\F1F2\\andrea_ind_april.xlsx")
+list_files = c(here("IndData", "Raw","F1F2","madeleine_ind_april.xlsx"), here("IndData", "Raw","F1F2","eric_ind_april.xlsx"), 
+               here("IndData", "Raw","F1F2","marc_ind_april.xlsx"), here("IndData", "Raw","F1F2","romario_ind_april.xlsx"), 
+               here("IndData", "Raw","F1F2","andrea_ind_april.xlsx"))
 
 # Variable to indicate the time point of data, used to name the files below
 timepoint = "F1F2"
@@ -91,8 +90,9 @@ list2env(F1F2data, envir = .GlobalEnv)
 ###################################################
 ###################################################
 
-list_files = c("Raw\\F3\\madeleine_ind_0723.xlsx", "Raw\\F3\\eric_ind_0723.xlsx", "Raw\\F3\\marc_ind_0723.xlsx", 
-               "Raw\\F3\\romario_ind_0723.xlsx", "Raw\\F3\\mahefa_ind_0723.xlsx")
+list_files = c(here("IndData", "Raw","F3","madeleine_ind_0723.xlsx"), here("IndData", "Raw","F3","eric_ind_0723.xlsx"), 
+               here("IndData", "Raw","F3","marc_ind_0723.xlsx"), here("IndData", "Raw","F3","romario_ind_0723.xlsx"),
+               here("IndData", "Raw","F3","mahefa_ind_0723.xlsx"))
 
 timepoint = "F3"
 
@@ -113,8 +113,9 @@ list2env(F3data, envir = .GlobalEnv)
 ###################################################
 ###################################################
 
-list_files = c("Raw\\F4\\madeleine_ind_1023.xlsx", "Raw\\F4\\eric_ind_1023.xlsx", "Raw\\F4\\marc_ind_1023.xlsx", 
-               "Raw\\F4\\romario_ind_1023.xlsx", "Raw\\F4\\mahefa_ind_1023.xlsx")
+list_files = c(here("IndData", "Raw","F4","madeleine_ind_1023.xlsx"), here("IndData", "Raw","F4","eric_ind_1023.xlsx"),
+               here("IndData", "Raw","F4","marc_ind_1023.xlsx"), here("IndData", "Raw","F4","romario_ind_1023.xlsx"), 
+               here("IndData", "Raw","F4","mahefa_ind_1023.xlsx"))
 
 timepoint = "F4"
 
@@ -180,44 +181,44 @@ vegetables_repeat = bind_rows(F1F2_vegetables_repeat, F3_vegetables_repeat, F4_v
 vegetables_outside_repeat = bind_rows(F3_vegetables_outside_repeat, F4_vegetables_outside_repeat)
 
 
-save(beans_sauce_repeat, file = 'beans_sauce_repeat.RData')
-save(beans_repeat, file = 'beans_repeat.RData')
-save(beans_outside_repeat, file = 'beans_outside_repeat.RData')
-save(beverage_repeat, file = 'beverage_repeat.RData')
-save(beverage_outside_repeat, file = 'beverage_outside_repeat.RData')
-save(bread_repeat, file = 'bread_repeat.RData')
-save(bread_outside_repeat, file = 'bread_outside_repeat.RData')
-save(condiment_repeat, file = 'condiment_repeat.RData')
-#save(corn_sauce_repeat, file = 'corn_sauce_repeat.RData')
-save(dairy_repeat, file = 'dairy_repeat.RData')
-save(dairy_outside_repeat, file = 'dairy_outside_repeat.RData')
-#save(fat_food_repeat, file = 'fat_food_repeat.RData')
-save(fish_sauce_repeat, file = 'fish_sauce_repeat.RData')
-save(fish_repeat, file = 'fish_repeat.RData')
-save(fish_outside_repeat, file = 'fish_outside_repeat.RData')
-save(fishing_area_repeat, file = 'fishing_area_repeat.RData')
-save(fruits_repeat, file = 'fruits_repeat.RData')
-save(fruits_outside_repeat, file = 'fruits_outside_repeat.RData')
-save(greens_sauce_repeat, file = 'greens_sauce_repeat.RData')
-save(greens_repeat, file = 'greens_repeat.RData')
-save(greens_outside_repeat, file = 'greens_outside_repeat.RData')
-save(guest_repeat, file = 'guest_repeat.RData')
-save(marine_inverts_sauce_repeat, file = 'marine_inverts_sauce_repeat.RData')
-save(marine_inverts_repeat, file = 'marine_inverts_repeat.RData')
-save(marine_inverts_outside_repeat, file = 'marine_inverts_outside_repeat.RData')
-save(meat_sauce_repeat, file = 'meat_sauce_repeat.RData')
-save(meat_repeat, file = 'meat_repeat.RData')
-save(meat_outside_repeat, file = 'meat_outside_repeat.RData')
-save(member, file = 'member.RData')
-save(occupation_repeat, file = 'occupation_repeat.RData')
-save(rice_sauce_repeat, file = 'rice_sauce_repeat.RData')
-save(snacks_repeat, file = 'snacks_repeat.RData')
-save(snacks_outside_repeat, file = 'snacks_outside_repeat.RData')
-save(main, file = 'main.RData')
-save(tubers_repeat, file = 'tubers_repeat.RData')
-#save(tubers_sauce_repeat, file = 'tubers_sauce_repeat.RData')
-save(tubers_outside_repeat, file = 'tubers_outside_repeat.RData')
-save(vegetables_sauce_repeat, file = 'vegetables_sauce_repeat.RData')
-save(vegetables_repeat, file = 'vegetables_repeat.RData')
-save(vegetables_outside_repeat, file = 'vegetables_outside_repeat.RData')
+save(beans_sauce_repeat, file = here("IndData", 'beans_sauce_repeat.RData'))
+save(beans_repeat, file = here("IndData", 'beans_repeat.RData'))
+save(beans_outside_repeat, file = here("IndData", 'beans_outside_repeat.RData'))
+save(beverage_repeat, file = here("IndData", 'beverage_repeat.RData'))
+save(beverage_outside_repeat, file = here("IndData", 'beverage_outside_repeat.RData'))
+save(bread_repeat, file = here("IndData", 'bread_repeat.RData'))
+save(bread_outside_repeat, file = here("IndData", 'bread_outside_repeat.RData'))
+save(condiment_repeat, file = here("IndData", 'condiment_repeat.RData'))
+#save(corn_sauce_repeat, file = here("IndData", 'corn_sauce_repeat.RData'))
+save(dairy_repeat, file = here("IndData", 'dairy_repeat.RData'))
+save(dairy_outside_repeat, file = here("IndData", 'dairy_outside_repeat.RData'))
+#save(fat_food_repeat, file = here("IndData", 'fat_food_repeat.RData'))
+save(fish_sauce_repeat, file = here("IndData", 'fish_sauce_repeat.RData'))
+save(fish_repeat, file = here("IndData", 'fish_repeat.RData'))
+save(fish_outside_repeat, file = here("IndData", 'fish_outside_repeat.RData'))
+save(fishing_area_repeat, file = here("IndData", 'fishing_area_repeat.RData'))
+save(fruits_repeat, file = here("IndData", 'fruits_repeat.RData'))
+save(fruits_outside_repeat, file = here("IndData", 'fruits_outside_repeat.RData'))
+save(greens_sauce_repeat, file = here("IndData", 'greens_sauce_repeat.RData'))
+save(greens_repeat, file = here("IndData", 'greens_repeat.RData'))
+save(greens_outside_repeat, file = here("IndData", 'greens_outside_repeat.RData'))
+save(guest_repeat, file = here("IndData", 'guest_repeat.RData'))
+save(marine_inverts_sauce_repeat, file = here("IndData", 'marine_inverts_sauce_repeat.RData'))
+save(marine_inverts_repeat, file = here("IndData", 'marine_inverts_repeat.RData'))
+save(marine_inverts_outside_repeat, file = here("IndData", 'marine_inverts_outside_repeat.RData'))
+save(meat_sauce_repeat, file = here("IndData", 'meat_sauce_repeat.RData'))
+save(meat_repeat, file = here("IndData", 'meat_repeat.RData'))
+save(meat_outside_repeat, file = here("IndData", 'meat_outside_repeat.RData'))
+save(member, file = here("IndData", 'member.RData'))
+save(occupation_repeat, file = here("IndData", 'occupation_repeat.RData'))
+save(rice_sauce_repeat, file = here("IndData", 'rice_sauce_repeat.RData'))
+save(snacks_repeat, file = here("IndData", 'snacks_repeat.RData'))
+save(snacks_outside_repeat, file = here("IndData", 'snacks_outside_repeat.RData'))
+save(main, file = here("IndData", 'main.RData'))
+save(tubers_repeat, file = here("IndData", 'tubers_repeat.RData'))
+#save(tubers_sauce_repeat, file = here("IndData", 'tubers_sauce_repeat.RData'))
+save(tubers_outside_repeat, file = here("IndData", 'tubers_outside_repeat.RData'))
+save(vegetables_sauce_repeat, file = here("IndData", 'vegetables_sauce_repeat.RData'))
+save(vegetables_repeat, file = here("IndData", 'vegetables_repeat.RData'))
+save(vegetables_outside_repeat, file = here("IndData", 'vegetables_outside_repeat.RData'))
 
