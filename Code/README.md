@@ -4,12 +4,17 @@
 
 * _HH_processing.R_: R code that reads in the original data files, processes them, and saves them as RData files. This code can be updated when further data is collected.
 * _HH_utils.R_: R code for the two functions I use in data processing. One reads the multi-sheet Excel documents, and the other function identifies the data contained in the various Excel sheets, aggregates them by topic (i.e., main data, income, etc), and harmonizes the data types.
-  * PLEASE NOTE: this code requires an __accurate__ and up to date data dictionary, like HH_DataDictionary (under the Data Dictionary folder) to inform it what data type each variable should be. Inaccuries in the data type listed in the data dictionary can lead to erros in the data processing.
+  * PLEASE NOTE: this code requires an __accurate__ and up to date data dictionary, like HH_DataDictionary (under the Data Dictionary folder) to inform it what data type each variable should be. Inaccuracies in the data type listed in the data dictionary can lead to errors in the data processing.
 
 ## Code relevant to the individual data
 * _Ind_processing.R_: R code that reads in the original data files, processes them, and saves them as RData files. This code can be updated when further data is collected.
 * _Ind_utils.R_: R code for the two functions I use in data processing. One reads the multi-sheet Excel documents, and the other function identifies the data contained in the various Excel sheets, aggregates them by topic (i.e., main data, member data, etc), and harmonizes the data types.
-  * PLEASE NOTE: this code requires an __accurate__ and up to date data dictionary, like Ind_DataDictionary (under the Data Dictionary folder) to inform it what data type each variable should be. Inaccuries in the data type listed in the data dictionary can lead to erros in the data processing.
+  * PLEASE NOTE: this code requires an __accurate__ and up to date data dictionary, like Ind_DataDictionary (under the Data Dictionary folder) to inform it what data type each variable should be. Inaccuracies in the data type listed in the data dictionary can lead to errors in the data processing.
+  
+## Code for survey weights
+
+* _SurveyWeight_processing.R_: code that reads in lists of each household determined to be farmer/nonfarmer/fisher/nonfisher, add the survey weights, and merge those onto the main data. This code outputs a dataset that can be merged onto the main.RData household data file by "hh_name" and "date"
+
 
 ## Notes
 There are a few errors/warnings that you should pay attention to while using this code:
