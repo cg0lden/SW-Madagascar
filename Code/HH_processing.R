@@ -146,21 +146,47 @@ if (length(unique(names(F1F2data))) != length(names(F1F2data))){
 list2env(F4data, envir = .GlobalEnv)
 
 
+
+###################################################
+###################################################
+#                   F5
+###################################################
+###################################################
+
+dd_file = here("Data Dictionary","HH_DataDictionary.xlsx")
+
+list_files = c(here("HHData", "Raw","F5","madeleine_hh_0124.xlsx"), here("HHData", "Raw","F5","eric_hh_0124.xlsx"),
+               here("HHData", "Raw","F5","marc_hh_0124.xlsx"), 
+               here("HHData", "Raw","F5","romario_hh_0124.xlsx"), here("HHData", "Raw","F5","mahefa_hh_0124.xlsx"))
+
+timepoint = "F5"
+
+F5data <- load_ARMSData(dd_file, list_files, timepoint) 
+
+if (length(unique(names(F1F2data))) != length(names(F1F2data))){
+  warning("Lists are not unique")
+}
+
+# Bring the datasets into the global environment
+list2env(F5data, envir = .GlobalEnv)
+
+
+###################################################
 ###################################################
 ###################################################
 #                   Stack All
 ###################################################
 ###################################################
 
-main = bind_rows(F1F2_main, F3_main, F4_main)
-absent_repeat = bind_rows(F1F2_absent_repeat, F3_absent_repeat, F4_absent_repeat)
-animal_repeat = bind_rows(F1F2_animal_repeat, F3_animal_repeat, F4_animal_repeat)
-crops_repeat= bind_rows(F1F2_crops_repeat, F3_crops_repeat, F4_crops_repeat)
-income_repeat = bind_rows(F1F2_income_repeat, F3_income_repeat, F4_income_repeat)
-salary_repeat = bind_rows(F1F2_salary_repeat, F3_salary_repeat, F4_salary_repeat)
-wage_repeat = bind_rows(F1F2_wage_repeat, F3_wage_repeat, F4_wage_repeat)
-member_new_repeat = bind_rows(F1F2_member_new_repeat, F3_member_new_repeat, F4_member_new_repeat)
-member_left_repeat = bind_rows(F1F2_member_left_repeat, F3_member_left_repeat, F4_member_left_repeat)
+main = bind_rows(F1F2_main, F3_main, F4_main, F5_main)
+absent_repeat = bind_rows(F1F2_absent_repeat, F3_absent_repeat, F4_absent_repeat, F5_absent_repeat)
+animal_repeat = bind_rows(F1F2_animal_repeat, F3_animal_repeat, F4_animal_repeat, F5_animal_repeat)
+crops_repeat= bind_rows(F1F2_crops_repeat, F3_crops_repeat, F4_crops_repeat, F5_crops_repeat)
+income_repeat = bind_rows(F1F2_income_repeat, F3_income_repeat, F4_income_repeat, F5_income_repeat)
+salary_repeat = bind_rows(F1F2_salary_repeat, F3_salary_repeat, F4_salary_repeat, F5_salary_repeat)
+wage_repeat = bind_rows(F1F2_wage_repeat, F3_wage_repeat, F4_wage_repeat, F5_wage_repeat)
+member_new_repeat = bind_rows(F1F2_member_new_repeat, F3_member_new_repeat, F4_member_new_repeat, F5_member_new_repeat)
+member_left_repeat = bind_rows(F1F2_member_left_repeat, F3_member_left_repeat, F4_member_left_repeat, F5_member_left_repeat)
 
 save(main, file = here("HHData", "main.RData"))
 save(absent_repeat, file = here("HHData", "absent_repeat.RData"))
