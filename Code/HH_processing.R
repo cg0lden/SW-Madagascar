@@ -188,6 +188,30 @@ wage_repeat = bind_rows(F1F2_wage_repeat, F3_wage_repeat, F4_wage_repeat, F5_wag
 member_new_repeat = bind_rows(F1F2_member_new_repeat, F3_member_new_repeat, F4_member_new_repeat, F5_member_new_repeat)
 member_left_repeat = bind_rows(F1F2_member_left_repeat, F3_member_left_repeat, F4_member_left_repeat, F5_member_left_repeat)
 
+
+
+
+###################################################
+###################################################
+###################################################
+#                 Add variables
+###################################################
+###################################################
+
+main$collection_wave <- ifelse('2023-01-01' <= main$today & main$today <= '2023-02-18', 1,
+                               ifelse('2023-04-01' <= main$today & main$today <= '2023-05-18', 2,
+                                      ifelse('2023-07-01' <= main$today & main$today <= '2023-08-18', 3,
+                                             ifelse('2023-10-10' <= main$today & main$today <= '2023-11-18', 4,
+                                                    ifelse('2024-01-10' <= main$today & main$today <= '2024-02-14', 5, 99)))))
+
+
+###################################################
+###################################################
+###################################################
+#                   Save All
+###################################################
+###################################################
+
 save(main, file = here("HHData", "main.RData"))
 save(absent_repeat, file = here("HHData", "absent_repeat.RData"))
 save(animal_repeat, file = here("HHData", "animal_repeat.RData"))

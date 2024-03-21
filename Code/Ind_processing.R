@@ -181,6 +181,26 @@ vegetables_repeat = bind_rows(F1F2_vegetables_repeat, F3_vegetables_repeat, F4_v
 vegetables_outside_repeat = bind_rows(F3_vegetables_outside_repeat, F4_vegetables_outside_repeat)
 
 
+###################################################
+###################################################
+###################################################
+#                 Add variables
+###################################################
+###################################################
+main$collection_wave <- ifelse('2023-01-01' <= main$today & main$today <= '2023-02-18', 1,
+                               ifelse('2023-04-01' <= main$today & main$today <= '2023-05-18', 2,
+                                      ifelse('2023-07-01' <= main$today & main$today <= '2023-08-18', 3,
+                                             ifelse('2023-10-10' <= main$today & main$today <= '2023-11-18', 4,
+                                                    ifelse('2024-01-10' <= main$today & main$today <= '2024-02-14', 5, 99)))))
+
+
+###################################################
+###################################################
+###################################################
+#                   Save All
+###################################################
+###################################################
+
 save(beans_sauce_repeat, file = here("IndData", 'beans_sauce_repeat.RData'))
 save(beans_repeat, file = here("IndData", 'beans_repeat.RData'))
 save(beans_outside_repeat, file = here("IndData", 'beans_outside_repeat.RData'))
