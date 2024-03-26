@@ -70,7 +70,7 @@ weights_farmers <- data.frame(WEIGHTS = c("Farmer_Child5", "Farmer_NoChild5", "N
                                                       288, 288, 65, 65), 
                               num_households_sampled = c(39, 39, 6, 6, 
                                                          32, 32, 13, 13),
-                              village = c("Akatrakatraky", "Akatrakatraky", "Akatrakatraky", "Akatrakatraky",
+                              village = c("Ankatrakatraky", "Ankatrakatraky", "Ankatrakatraky", "Ankatrakatraky",
                                           "Ranobe", "Ranobe", "Ranobe", "Ranobe"))
 
 weights_farmers$perc_sample_of_category <- weights_farmers$num_households_sampled/weights_farmers$num_household_total * 100
@@ -99,7 +99,10 @@ all_types <- bind_rows(fisher_L5, fisher_NL5, nonfisher_L5, nonfisher_NL5, farme
 # Merge
 ######################################
 
-weight_data <- left_join(all_types, weights_fix, by = c("WEIGHTS" = "WEIGHTS", "village" = "village"))
+all_types$village <- tolower(all_types$village)
+all_weights$village <- tolower(all_weights$village)
+
+weight_data <- left_join(all_types, all_weights, by = c("WEIGHTS" = "WEIGHTS", "village" = "village"))
 
 # Remove the ID/index variables 
 weight_data$index <- NULL
