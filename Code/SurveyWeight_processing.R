@@ -118,7 +118,7 @@ weight_data[weight_data$label_hoh=="sambiainy_besofy_m_1968",]
 # Merge with household data
 ######################################
 
-load("C:\\Users\\emmcr\\Documents\\ARMS_Golden\\HHData\\main.RData")
+load("~/Desktop/ARMS analysis/SW-Madagascar/HHData/main.RData")
 
 # ensure the villages have the same capitalization
 main$village_merge = tolower(main$village)

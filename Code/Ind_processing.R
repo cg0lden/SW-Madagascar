@@ -133,6 +133,30 @@ list2env(F4data, envir = .GlobalEnv)
 
 ###################################################
 ###################################################
+#                   F5
+###################################################
+###################################################
+
+list_files = c(here("IndData", "Raw","F5","madeleine_ind_0124.xlsx"), here("IndData", "Raw","F5","eric_ind_0124.xlsx"),
+               here("IndData", "Raw","F5","marc_ind_0124.xlsx"), here("IndData", "Raw","F5","romario_ind_0124.xlsx"), 
+               here("IndData", "Raw","F5","mahefa_ind_0124.xlsx"))
+
+timepoint = "F5"
+
+F5data <- load_ARMSData(dd_file, list_files, timepoint) #34 datasets, good to go
+
+# Check that there aren't repeats
+if (length(unique(names(F4data))) != length(names(F4data))){
+  warning("Lists are not unique")
+}
+
+# Bring the datasets into the global environment
+list2env(F5data, envir = .GlobalEnv)
+
+
+
+###################################################
+###################################################
 #                   Stack All
 ###################################################
 ###################################################
@@ -140,46 +164,46 @@ list2env(F4data, envir = .GlobalEnv)
 # Not all waves of data collection have data from every possible repeating section
 # Some repeating sections have no data yet, so I have commented them out. If they have data in future waves, make sure to run those lines
 
-beans_sauce_repeat = bind_rows(F1F2_beans_sauce_repeat, F3_beans_sauce_repeat, F4_beans_sauce_repeat)
-beans_repeat = bind_rows(F1F2_beans_repeat, F3_beans_repeat, F4_beans_repeat)
-beans_outside_repeat = bind_rows(F3_beans_outside_repeat, F4_beans_outside_repeat)
-beverage_repeat = bind_rows(F1F2_beverage_repeat, F3_beverage_repeat, F4_beverage_repeat)
-beverage_outside_repeat = bind_rows(F1F2_beverage_outside_repeat, F3_beverage_outside_repeat, F4_beverage_outside_repeat)
-bread_repeat = bind_rows(F1F2_bread_repeat, F3_bread_repeat, F4_bread_repeat)
-bread_outside_repeat = bind_rows(F1F2_bread_outside_repeat, F3_bread_outside_repeat, F4_bread_outside_repeat)
-condiment_repeat = bind_rows(F1F2_condiment_repeat, F3_condiment_repeat, F4_condiment_repeat)
+beans_sauce_repeat = bind_rows(F1F2_beans_sauce_repeat, F3_beans_sauce_repeat, F4_beans_sauce_repeat, F5_beans_sauce_repeat)
+beans_repeat = bind_rows(F1F2_beans_repeat, F3_beans_repeat, F4_beans_repeat, F5_beans_repeat)
+beans_outside_repeat = bind_rows(F3_beans_outside_repeat, F4_beans_outside_repeat, F5_beans_outside_repeat)
+beverage_repeat = bind_rows(F1F2_beverage_repeat, F3_beverage_repeat, F4_beverage_repeat, F5_beverage_repeat)
+beverage_outside_repeat = bind_rows(F1F2_beverage_outside_repeat, F3_beverage_outside_repeat, F4_beverage_outside_repeat, F5_beverage_outside_repeat)
+bread_repeat = bind_rows(F1F2_bread_repeat, F3_bread_repeat, F4_bread_repeat, F5_bread_repeat)
+bread_outside_repeat = bind_rows(F1F2_bread_outside_repeat, F3_bread_outside_repeat, F4_bread_outside_repeat, F5_bread_outside_repeat)
+condiment_repeat = bind_rows(F1F2_condiment_repeat, F3_condiment_repeat, F4_condiment_repeat, F5_condiment_repeat)
 #corn_sauce_repeat = bind_rows(F4_corn_sauce_repeat)
-dairy_repeat = bind_rows(F1F2_dairy_repeat, F3_dairy_repeat)
-dairy_outside_repeat = bind_rows(F1F2_dairy_outside_repeat, F3_dairy_outside_repeat)
-#fat_food_repeat = bind_rows(F4_fat_food_repeat)
-fish_sauce_repeat = bind_rows(F1F2_fish_sauce_repeat, F3_fish_sauce_repeat, F4_fish_sauce_repeat)
-fish_repeat = bind_rows(F1F2_fish_repeat, F3_fish_repeat, F4_fish_repeat)
-fish_outside_repeat = bind_rows(F1F2_fish_outside_repeat, F3_fish_outside_repeat, F4_fish_outside_repeat)
-fishing_area_repeat = bind_rows(F1F2_fishing_area_repeat, F3_fishing_area_repeat, F4_fishing_area_repeat)
-fruits_repeat = bind_rows(F1F2_fruits_repeat, F3_fruits_repeat, F4_fruits_repeat)
-fruits_outside_repeat = bind_rows(F1F2_fruits_outside_repeat, F3_fruits_outside_repeat, F4_fruits_outside_repeat)
-greens_sauce_repeat = bind_rows(F1F2_greens_sauce_repeat, F3_greens_sauce_repeat, F4_greens_sauce_repeat)
-greens_repeat = bind_rows(F1F2_greens_repeat, F3_greens_repeat, F4_greens_repeat)
-greens_outside_repeat = bind_rows(F3_greens_outside_repeat, F4_greens_outside_repeat)
-guest_repeat = bind_rows(F1F2_guest_repeat, F3_guest_repeat, F4_guest_repeat)
-marine_inverts_sauce_repeat = bind_rows(F1F2_marine_inverts_sauce_repeat, F3_marine_inverts_sauce_repeat, F4_marine_inverts_sauce_repeat)
-marine_inverts_repeat = bind_rows(F1F2_marine_inverts_repeat, F3_marine_inverts_repeat, F4_marine_inverts_repeat)
-marine_inverts_outside_repeat = bind_rows(F1F2_marine_inverts_outside_repeat, F3_marine_inverts_outside_repeat, F4_marine_inverts_outside_repeat)
-meat_sauce_repeat = bind_rows(F1F2_meat_sauce_repeat, F3_meat_sauce_repeat, F4_meat_sauce_repeat)
-meat_repeat = bind_rows(F1F2_meat_repeat, F3_meat_repeat, F4_meat_repeat)
-meat_outside_repeat = bind_rows(F3_meat_outside_repeat, F4_meat_outside_repeat)
-member = bind_rows(F1F2_member, F3_member, F4_member)
-occupation_repeat = bind_rows(F1F2_occupation_repeat, F3_occupation_repeat, F4_occupation_repeat)
+dairy_repeat = bind_rows(F1F2_dairy_repeat, F3_dairy_repeat, F5_dairy_repeat)
+dairy_outside_repeat = bind_rows(F1F2_dairy_outside_repeat, F3_dairy_outside_repeat, F5_dairy_outside_repeat)
+fat_food_repeat = bind_rows(F5_fat_food_repeat)
+fish_sauce_repeat = bind_rows(F1F2_fish_sauce_repeat, F3_fish_sauce_repeat, F4_fish_sauce_repeat, F5_fish_sauce_repeat)
+fish_repeat = bind_rows(F1F2_fish_repeat, F3_fish_repeat, F4_fish_repeat, F5_fish_repeat)
+fish_outside_repeat = bind_rows(F1F2_fish_outside_repeat, F3_fish_outside_repeat, F4_fish_outside_repeat, F5_fish_outside_repeat)
+fishing_area_repeat = bind_rows(F1F2_fishing_area_repeat, F3_fishing_area_repeat, F4_fishing_area_repeat, F5_fishing_area_repeat)
+fruits_repeat = bind_rows(F1F2_fruits_repeat, F3_fruits_repeat, F4_fruits_repeat, F5_fruits_repeat)
+fruits_outside_repeat = bind_rows(F1F2_fruits_outside_repeat, F3_fruits_outside_repeat, F4_fruits_outside_repeat, F5_fruits_outside_repeat)
+greens_sauce_repeat = bind_rows(F1F2_greens_sauce_repeat, F3_greens_sauce_repeat, F4_greens_sauce_repeat, F5_greens_sauce_repeat)
+greens_repeat = bind_rows(F1F2_greens_repeat, F3_greens_repeat, F4_greens_repeat, F5_greens_repeat)
+greens_outside_repeat = bind_rows(F3_greens_outside_repeat, F4_greens_outside_repeat, F5_greens_outside_repeat)
+guest_repeat = bind_rows(F1F2_guest_repeat, F3_guest_repeat, F4_guest_repeat, F5_guest_repeat)
+marine_inverts_sauce_repeat = bind_rows(F1F2_marine_inverts_sauce_repeat, F3_marine_inverts_sauce_repeat, F4_marine_inverts_sauce_repeat, F5_marine_inverts_sauce_repeat)
+marine_inverts_repeat = bind_rows(F1F2_marine_inverts_repeat, F3_marine_inverts_repeat, F4_marine_inverts_repeat, F5_marine_inverts_repeat)
+marine_inverts_outside_repeat = bind_rows(F1F2_marine_inverts_outside_repeat, F3_marine_inverts_outside_repeat, F4_marine_inverts_outside_repeat, F5_marine_inverts_outside_repeat)
+meat_sauce_repeat = bind_rows(F1F2_meat_sauce_repeat, F3_meat_sauce_repeat, F4_meat_sauce_repeat, F5_meat_sauce_repeat)
+meat_repeat = bind_rows(F1F2_meat_repeat, F3_meat_repeat, F4_meat_repeat, F5_meat_repeat)
+meat_outside_repeat = bind_rows(F3_meat_outside_repeat, F4_meat_outside_repeat, F5_meat_outside_repeat)
+member = bind_rows(F1F2_member, F3_member, F4_member, F5_member)
+occupation_repeat = bind_rows(F1F2_occupation_repeat, F3_occupation_repeat, F4_occupation_repeat, F5_occupation_repeat)
 rice_sauce_repeat = bind_rows(F1F2_rice_sauce_repeat)
-snacks_repeat = bind_rows(F1F2_snacks_repeat, F3_snacks_repeat, F4_snacks_repeat)
-snacks_outside_repeat = bind_rows(F1F2_snacks_outside_repeat, F3_snacks_outside_repeat, F4_snacks_outside_repeat)
-main = bind_rows(F1F2_main, F3_main, F4_main)
-tubers_repeat = bind_rows(F1F2_tubers_repeat, F3_tubers_repeat, F4_tubers_repeat)
+snacks_repeat = bind_rows(F1F2_snacks_repeat, F3_snacks_repeat, F4_snacks_repeat, F5_snacks_repeat)
+snacks_outside_repeat = bind_rows(F1F2_snacks_outside_repeat, F3_snacks_outside_repeat, F4_snacks_outside_repeat, F5_snacks_outside_repeat)
+main = bind_rows(F1F2_main, F3_main, F4_main, F5_main)
+tubers_repeat = bind_rows(F1F2_tubers_repeat, F3_tubers_repeat, F4_tubers_repeat, F5_tubers_repeat)
 #tubers_sauce_repeat = bind_rows(F4_tubers_sauce_repeat)
-tubers_outside_repeat = bind_rows(F1F2_tubers_outside_repeat, F3_tubers_outside_repeat, F4_tubers_outside_repeat)
-vegetables_sauce_repeat = bind_rows(F1F2_vegetables_sauce_repeat, F3_vegetables_sauce_repeat, F4_vegetables_sauce_repeat)
-vegetables_repeat = bind_rows(F1F2_vegetables_repeat, F3_vegetables_repeat, F4_vegetables_repeat)
-vegetables_outside_repeat = bind_rows(F3_vegetables_outside_repeat, F4_vegetables_outside_repeat)
+tubers_outside_repeat = bind_rows(F1F2_tubers_outside_repeat, F3_tubers_outside_repeat, F4_tubers_outside_repeat, F5_tubers_outside_repeat)
+vegetables_sauce_repeat = bind_rows(F1F2_vegetables_sauce_repeat, F3_vegetables_sauce_repeat, F4_vegetables_sauce_repeat, F5_vegetables_sauce_repeat)
+vegetables_repeat = bind_rows(F1F2_vegetables_repeat, F3_vegetables_repeat, F4_vegetables_repeat, F5_vegetables_repeat)
+vegetables_outside_repeat = bind_rows(F3_vegetables_outside_repeat, F4_vegetables_outside_repeat, F5_vegetables_outside_repeat)
 
 
 ###################################################
@@ -198,10 +222,11 @@ main$collection_wave <- ifelse('2023-01-01' <= main$today & main$today <= '2023-
 ###################################################
 ###################################################
 ###################################################
-#                   Save All
+#                   Save All 
 ###################################################
 ###################################################
 
+# if you 'added' a new file in the section above make sure you also add it here so it saves
 save(beans_sauce_repeat, file = here("IndData", 'beans_sauce_repeat.RData'))
 save(beans_repeat, file = here("IndData", 'beans_repeat.RData'))
 save(beans_outside_repeat, file = here("IndData", 'beans_outside_repeat.RData'))
@@ -213,7 +238,7 @@ save(condiment_repeat, file = here("IndData", 'condiment_repeat.RData'))
 #save(corn_sauce_repeat, file = here("IndData", 'corn_sauce_repeat.RData'))
 save(dairy_repeat, file = here("IndData", 'dairy_repeat.RData'))
 save(dairy_outside_repeat, file = here("IndData", 'dairy_outside_repeat.RData'))
-#save(fat_food_repeat, file = here("IndData", 'fat_food_repeat.RData'))
+save(fat_food_repeat, file = here("IndData", 'fat_food_repeat.RData'))
 save(fish_sauce_repeat, file = here("IndData", 'fish_sauce_repeat.RData'))
 save(fish_repeat, file = here("IndData", 'fish_repeat.RData'))
 save(fish_outside_repeat, file = here("IndData", 'fish_outside_repeat.RData'))
