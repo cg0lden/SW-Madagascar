@@ -41,6 +41,11 @@ library(lubridate)
 # Load utilities
 source(here("Code", "Ind_utils.R"))
 
+
+# Data dictionary and translation files
+dd_file = here("Data Dictionary","Ind_DataDictionary.xlsx")
+trans_file <- here("Data Dictionary", "Translation_formats.xlsx")
+
 ###################################################
 ###################################################
 #                   F1 and F2
@@ -48,7 +53,6 @@ source(here("Code", "Ind_utils.R"))
 ###################################################
 
 # File locations
-dd_file = here("Data Dictionary","Ind_DataDictionary.xlsx")
 
 list_files = c(here("IndData", "Raw","F1F2","madeleine_ind_april.xlsx"), here("IndData", "Raw","F1F2","eric_ind_april.xlsx"), 
                here("IndData", "Raw","F1F2","marc_ind_april.xlsx"), here("IndData", "Raw","F1F2","romario_ind_april.xlsx"), 
@@ -58,7 +62,7 @@ list_files = c(here("IndData", "Raw","F1F2","madeleine_ind_april.xlsx"), here("I
 timepoint = "F1F2"
 
 # Import and process the data (this step may take a few minutes)
-F1F2data <- load_ARMSData(dd_file, list_files, timepoint)
+F1F2data <- load_ARMSData(dd_file, trans_file, list_files, timepoint)
 
 #!IMPORTANT! At this step, make sure there is only one dataset per excel sheet/variable group. If there are more, 
 # it means that they had different variables. Confirm why below before combining:
@@ -97,7 +101,7 @@ list_files = c(here("IndData", "Raw","F3","madeleine_ind_0723.xlsx"), here("IndD
 
 timepoint = "F3"
 
-F3data <- load_ARMSData(dd_file, list_files, timepoint) #36 datasets, good to go
+F3data <- load_ARMSData(dd_file, trans_file, list_files, timepoint) #36 datasets, good to go
 
 # Check that there aren't repeats
 if (length(unique(names(F3data))) != length(names(F3data))){
@@ -120,7 +124,7 @@ list_files = c(here("IndData", "Raw","F4","madeleine_ind_1023.xlsx"), here("IndD
 
 timepoint = "F4"
 
-F4data <- load_ARMSData(dd_file, list_files, timepoint) #34 datasets, good to go
+F4data <- load_ARMSData(dd_file, trans_file, list_files, timepoint) #34 datasets, good to go
 
 # Check that there aren't repeats
 if (length(unique(names(F3data))) != length(names(F3data))){
