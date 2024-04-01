@@ -50,6 +50,12 @@ library(here)
 # Load utilities
 source(here("Code", "HH_utils.R"))
 
+# Data dictionary and translation files
+dd_file = here("Data Dictionary","HH_DataDictionary.xlsx")
+trans_file <- here("Data Dictionary", "Translation_formats.xlsx")
+
+
+
 ###################################################
 ###################################################
 #                   F1 and F2
@@ -57,8 +63,6 @@ source(here("Code", "HH_utils.R"))
 ###################################################
 
 # File locations
-dd_file = here("Data Dictionary","HH_DataDictionary.xlsx")
-
 list_files = c(here("HHData", "Raw","F1F2","madeleine_hh_april.xlsx"), here("HHData", "Raw","F1F2","eric_hh_april.xlsx"), 
                here("HHData", "Raw","F1F2","marc_hh_april.xlsx"), 
                here("HHData", "Raw","F1F2","romario_hh_april.xlsx"), here("HHData", "Raw","F1F2","andrea_hh_april.xlsx"))
@@ -67,7 +71,7 @@ list_files = c(here("HHData", "Raw","F1F2","madeleine_hh_april.xlsx"), here("HHD
 timepoint = "F1F2"
 
 # Import and process the data
-F1F2data <- load_ARMSData(dd_file, list_files, timepoint)
+F1F2data <- load_ARMSData(dd_file, trans_file, list_files, timepoint)
 
 #!IMPORTANT! At this step, make sure there are only 9 datasets in the list (one per group). If there are more, 
 # it means that they had different variables. Confirm why below before combining:
@@ -104,15 +108,13 @@ list2env(F1F2data, envir = .GlobalEnv)
 ###################################################
 ###################################################
 
-dd_file = here("Data Dictionary","HH_DataDictionary.xlsx")
-
 list_files = c(here("HHData", "Raw","F3","madeleine_hh_0723.xlsx"), here("HHData", "Raw","F3","eric_hh_0723.xlsx"),
                here("HHData", "Raw","F3","marc_hh_0723.xlsx"), here("HHData", "Raw","F3","romario_hh_0723.xlsx"), 
                here("HHData", "Raw","F3","mahefa_hh_0723.xlsx"))
 
 timepoint = "F3"
 
-F3data <- load_ARMSData(dd_file, list_files, timepoint) #9 datasets, good to go
+F3data <- load_ARMSData(dd_file, trans_file, list_files, timepoint) #9 datasets, good to go
 
 if (length(unique(names(F3data))) != length(names(F3data))){
   warning("Lists are not unique")
@@ -128,15 +130,13 @@ list2env(F3data, envir = .GlobalEnv)
 ###################################################
 ###################################################
 
-dd_file = here("Data Dictionary","HH_DataDictionary.xlsx")
-
 list_files = c(here("HHData", "Raw","F4","madeleine_hh_1023.xlsx"), here("HHData", "Raw","F4","eric_hh_1023.xlsx"),
                here("HHData", "Raw","F4","marc_hh_1023.xlsx"), 
                here("HHData", "Raw","F4","romario_hh_1023.xlsx"), here("HHData", "Raw","F4","mahefa_hh_1023.xlsx"))
 
 timepoint = "F4"
 
-F4data <- load_ARMSData(dd_file, list_files, timepoint) #9 datasets, good to go
+F4data <- load_ARMSData(dd_file, trans_file, list_files, timepoint) #9 datasets, good to go
 
 if (length(unique(names(F1F2data))) != length(names(F1F2data))){
   warning("Lists are not unique")
@@ -153,15 +153,13 @@ list2env(F4data, envir = .GlobalEnv)
 ###################################################
 ###################################################
 
-dd_file = here("Data Dictionary","HH_DataDictionary.xlsx")
-
 list_files = c(here("HHData", "Raw","F5","madeleine_hh_0124.xlsx"), here("HHData", "Raw","F5","eric_hh_0124.xlsx"),
                here("HHData", "Raw","F5","marc_hh_0124.xlsx"), 
                here("HHData", "Raw","F5","romario_hh_0124.xlsx"), here("HHData", "Raw","F5","mahefa_hh_0124.xlsx"))
 
 timepoint = "F5"
 
-F5data <- load_ARMSData(dd_file, list_files, timepoint) 
+F5data <- load_ARMSData(dd_file, trans_file, list_files, timepoint) 
 
 if (length(unique(names(F1F2data))) != length(names(F1F2data))){
   warning("Lists are not unique")
@@ -171,7 +169,6 @@ if (length(unique(names(F1F2data))) != length(names(F1F2data))){
 list2env(F5data, envir = .GlobalEnv)
 
 
-###################################################
 ###################################################
 ###################################################
 #                   Stack All
@@ -193,7 +190,6 @@ member_left_repeat = bind_rows(F1F2_member_left_repeat, F3_member_left_repeat, F
 
 ###################################################
 ###################################################
-###################################################
 #                 Add variables
 ###################################################
 ###################################################
@@ -205,7 +201,6 @@ main$collection_wave <- ifelse('2023-01-01' <= main$today & main$today <= '2023-
                                                     ifelse('2024-01-10' <= main$today & main$today <= '2024-02-14', 5, 99)))))
 
 
-###################################################
 ###################################################
 ###################################################
 #                   Save All
