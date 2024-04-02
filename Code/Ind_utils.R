@@ -45,7 +45,7 @@ multiplesheets <- function(fname) {
 } 
 
 
-load_ARMSData <- function(dd_file, list_files, timepoint){
+load_ARMSData <- function(dd_file, translate_file, list_files, timepoint){
   ###################################################
   # Step 1: Import Data
   
@@ -54,6 +54,11 @@ load_ARMSData <- function(dd_file, list_files, timepoint){
   dd_hh <- multiplesheets(dd_file)
   sheets_dd <- dd_hh[[2]]
   ds_dd <- dd_hh[[1]]
+  
+  
+  # Import data translations
+  trans_hh <- multiplesheets(translate_file)
+  ds_trans <- trans_hh[[1]][[2]]
   
   # Import all of the datasets and sheets
   comb_sheets = c()
@@ -179,6 +184,7 @@ load_ARMSData <- function(dd_file, list_files, timepoint){
       for (j in 1:nrow(dict)) {
         var_name <- dict$name[j]
         var_type <- dict$type[j]
+        var_trans <- dict$translation_format[j]
         
         if (!any(names(dataset) == var_name)){
           # fix the name changes for the blood pressure measurements
@@ -217,6 +223,24 @@ load_ARMSData <- function(dd_file, list_files, timepoint){
           print(var_name)
           print(dataset_name)
           print(var_type)
+        }
+        
+        # fix translations
+        if (!is.na(var_trans)){
+          
+          res_trans = ds_trans[ds_trans$format == var_trans,]
+          
+          for (f in 1:length(dataset[[var_name]])) {
+            words <- unlist(strsplit(dataset[[var_name]][f], " ")) # Split string by whitespace (necessary for 'select-all' variables)
+            for (g in 1:length(words)) {
+              match_index <- which(res_trans$choice == words[g])
+              if (length(match_index) > 0) {
+                words[g] <- res_trans$translation_fix[match_index]
+              }
+            }
+            dataset[[var_name]][f] <- paste(words, collapse = " ")# Recombine words into a single string
+          }
+      
         }
       }
       return(dataset)
