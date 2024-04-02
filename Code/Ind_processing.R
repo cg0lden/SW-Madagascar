@@ -147,7 +147,7 @@ list_files = c(here("IndData", "Raw","F5","madeleine_ind_0124.xlsx"), here("IndD
 
 timepoint = "F5"
 
-F5data <- load_ARMSData(dd_file, list_files, timepoint) #34 datasets, good to go
+F5data <- load_ARMSData(dd_file, trans_file, list_files, timepoint) #34 datasets, good to go
 
 # Check that there aren't repeats
 if (length(unique(names(F4data))) != length(names(F4data))){
