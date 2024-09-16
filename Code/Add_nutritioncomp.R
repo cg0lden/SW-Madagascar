@@ -39,6 +39,8 @@ nutcomp2 <- nutcomp %>%
 nutcomp_long <- nutcomp2[!is.na(nutcomp2$grams),]
 nutcomp_long <- nutcomp_long[nutcomp_long$new_group!= "(do not include)",]
 nutcomp_long$serving <- tolower(nutcomp_long$serving)
+nutcomp_long$serving <- ifelse(nutcomp_long$serving == "teaspoon", "tea_spoon", nutcomp_long$serving)
+nutcomp_long$serving <- ifelse(nutcomp_long$serving == "tablespoon", "table_spoon", nutcomp_long$serving)
 
 #####################################################
 # Load Individual data
@@ -54,7 +56,7 @@ indfiles_list <- gsub(".RData", "", indfiles)
 #####################################################
 # Get list of food files
 #### either don't include or must be treated differently
-indfiles_list_foods <- indfiles_list[!grepl("sauce|member|fishing_area|guest|main|occupation|condiment|beverage", indfiles_list)]
+indfiles_list_foods <- indfiles_list[!grepl("sauce|member|fishing_area|guest|main|occupation|condiment", indfiles_list)]
 #### data not ready yet
 indfiles_list_foods <- indfiles_list_foods[!grepl("inverts|fish", indfiles_list_foods)]
 
@@ -80,9 +82,23 @@ for (i in 1:length(indfiles_list_foods)){
   colnames(dat) <- gsub(paste0(gsub("_outside", "", vargroup),"_"), "", colnames(dat))
   colnames(dat) <- gsub("_outside", "", colnames(dat))
   
+  
+  if(grepl("meat", vargroup)==T){
+    dat$selected <- tolower(dat$selected)
+  }
+  
+  if(grepl("beverage", vargroup)==T){
+    coff_tea <- dat[dat$selected %in% c("coffee", "tea"),]
+    dat <- dat[!(dat$selected %in% c("coffee", "tea")),]
+  }
+  
+
+  dat$merge_day = date(dat$`_submission__submission_time`)
+  dat$person_day = paste0(dat$`_submission__id`, "_", dat$merge_day)
+  
   dat2 <- left_join(dat, nutcomp_long[nutcomp_long$old_group==gsub("_outside", "", vargroup),], by = c("selected" = "varname", "serving" = "serving")) %>% 
-                              select(-c("_parent_table_name", "_submission__id",            
-                              "_submission__validation_status", "_submission__notes",
+                              select(-c("_parent_table_name", "_submission__id",  "_submission__uuid",            
+                              "_submission__validation_status", "_submission__notes", "_submission__submission_time",
                                "_submission__status", "_submission__submitted_by","_submission___version__", "_submission__tags")) %>% 
                               mutate(tot_kcal = serving_size * grams * kcal_100g/100)
   
@@ -94,7 +110,80 @@ for (i in 1:length(indfiles_list_foods)){
   assign(indfiles_list_foods[i], dat2)
 }
 
+NA_serving[!(NA_serving$selected %in% c("coffee", "tea")),]
 
 write.csv(NA_serving, here("NutritionComp", "NA_nutcomp.csv"), row.names = FALSE)
 
 
+
+#####################################################
+# Look at oil in sauces
+#####################################################
+# Get list of sauce files
+indfiles_list_sauce <- indfiles_list[grepl("sauce", indfiles_list)]
+saucegroups = gsub("_repeat", "", indfiles_list_sauce)
+
+for (i in 1:length(indfiles_list_sauce)){
+  dat <- get(indfiles_list_sauce[i])
+  saucegroup = saucegroups[i]
+  
+  print(saucegroup)
+  
+  
+  colnames(dat) <- gsub(paste0(gsub("_outside", "", saucegroup),"_"), "", colnames(dat))
+  colnames(dat) <- gsub("_outside", "", colnames(dat))
+  
+  dat <- dat[dat$selected=="oil",]
+  dat$merge_day = date(dat$`_submission__submission_time`)
+  dat$person_day = paste0(dat$`_submission__id`, "_", dat$merge_day)
+  
+  dat2 <- left_join(dat, nutcomp_long[nutcomp_long$old_group=="added from sauce add ons",], by = c("selected" = "varname", "serving" = "serving")) %>% 
+    select(-c("_parent_table_name", "_submission__id",  "_submission__uuid",            
+              "_submission__validation_status", "_submission__notes", "_submission__submission_time",
+              "_submission__status", "_submission__submitted_by","_submission___version__", "_submission__tags")) %>% 
+    mutate(tot_kcal = serving_size * grams * kcal_100g/100)
+
+  assign(indfiles_list_sauce[i], dat2)
+}
+
+
+#####################################################
+# Look at added sugar/dairy in beverages
+#####################################################
+# Get list of sauce files
+indfiles_list_bev <- indfiles_list[grepl("beverage", indfiles_list)]
+bevgroups = gsub("_repeat", "", indfiles_list_bev)
+
+for (i in 1:length(indfiles_list_bev)){
+  dat <- get(indfiles_list_bev[i])
+  bevgroup = bevgroups[i]
+  
+  print(bevgroup)
+  
+  coff_tea <- dat[dat$selected %in% c("coffee", "tea"),]
+  other <- dat[!(dat$selected %in% c("coffee", "tea")),]
+  
+  colnames(coff_tea) <- gsub(paste0(gsub("_outside", "", bevgroup),"_"), "", colnames(coff_tea))
+  colnames(coff_tea) <- gsub("_outside", "", colnames(coff_tea))
+  
+  coff_tea$added_sugar <- ifelse(grepl("sugar", coff_tea$sugar_milk), "added sugar", NA)
+  coff_tea$added_milk <- ifelse(grepl("milk", coff_tea$sugar_milk), "added milk", NA)
+  
+  #coff_tea <- coff_tea %>% select(-c("serving_size", "grams", "kcal_100g", "new_group", "old_group", "eng_name"))
+  
+  #coff_tea2 <- left_join(coff_tea, nutcomp_long[nutcomp_long$old_group=="added from beverage add ons",], by = c("added_sugar" = "varname", "sugar_serving" = "serving")) #%>% 
+    #mutate(tot_kcal_addedsugar = serving_size * grams * kcal_100g/100)
+  
+  #coff_tea3 <- left_join(coff_tea2, nutcomp_long[nutcomp_long$old_group=="added from beverage add ons",], by = c("added_milk" = "varname", "milk_serving" = "serving")) #%>% 
+    #mutate(tot_kcal_addedmilk = serving_size * grams * kcal_100g/100)
+  
+  #dat2 <- rbind(other, coff_tea3)
+  
+  #assign(indfiles_list_bev[i], dat2)
+}
+
+nutcomp_long[nutcomp_long$old_group=="added from beverage add ons",]
+
+
+
+try <- left_join(beverage_repeat, nutcomp_long[nutcomp_long$old_group=="added from beverage add ons",], by = c("added_sugar" = "varname", "sugar_serving" = "serving")) #
