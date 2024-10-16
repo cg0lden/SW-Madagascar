@@ -5,14 +5,13 @@
 # Programmer: Emma Crenshaw
 #
 # Purpose:
-#   This code shows an example of how to merge datasets and create an
-#   indicator if there is an oil sauce
+#   This code creates the nutritional composition datasets
 #
-# Input:
+# Input: Individual level data
 #   
 #
-# Output:
-#  
+# Output: nutrition_data_household: household-level ("inside") nutrition data
+#         nutrition_data_outside: "outside" nutrition data
 #---------------------------------------------------------------------
 # Notes:
 ################################################################################
@@ -62,15 +61,17 @@ indfiles_list_foods <- indfiles_list_foods[!grepl("inverts|fish", indfiles_list_
 
 vargroups = gsub("_repeat", "", indfiles_list_foods)
 
-
+# keep track of which food/serving combos aren't in the file from Heather
 NA_serving = data.frame(dataset = c(), selected = c(), serving = c())
 
+# loop through each food dataset 
 for (i in 1:length(indfiles_list_foods)){
   dat <- get(indfiles_list_foods[i])
   vargroup = vargroups[i]
   
   print(vargroup)
   
+  # fix some variable names
   if(grepl("dairy", vargroup)==T){
     colnames(dat) <- gsub("diary", "dairy", colnames(dat))
   }
@@ -87,28 +88,42 @@ for (i in 1:length(indfiles_list_foods)){
     dat$selected <- tolower(dat$selected)
   }
   
+  # work with coffee and tea separately - need to deal with the added sugar and milk differently
   if(grepl("beverage", vargroup)==T){
-    coff_tea <- dat[dat$selected %in% c("coffee", "tea"),]
+    
+    if(grepl("outside", vargroup)==T){
+      coff_tea_outside <- dat[dat$selected %in% c("coffee", "tea"),]
+    }
+    else{coff_tea <- dat[dat$selected %in% c("coffee", "tea"),]}
+    
     dat <- dat[!(dat$selected %in% c("coffee", "tea")),]
+  
   }
   
 
+  # create some identifiers
   dat$merge_day = date(dat$`_submission__submission_time`)
   dat$person = dat$`_submission__id`
   dat$person_day = paste0(dat$`_submission__id`, "_", dat$merge_day)
   
+  # merge in nutritional data
   dat2 <- left_join(dat, nutcomp_long[nutcomp_long$old_group==gsub("_outside", "", vargroup),], by = c("selected" = "varname", "serving" = "serving")) %>% 
-                              select(-c("_parent_table_name", "_submission__id",  "_submission__uuid",            
+                              select(-c("_submission__id",  "_submission__uuid",            
                               "_submission__validation_status", "_submission__notes", "_submission__submission_time",
                                "_submission__status", "_submission__submitted_by","_submission___version__", "_submission__tags")) %>% 
                               mutate(tot_kcal = serving_size * grams * kcal_100g/100)
   
-  nocal = unique(dat2[is.na(dat2$tot_kcal),c("selected", "serving")])
+  # add member name
+  dat3 <- left_join(dat2, member[,c("member", "_submission__id", "_index")], 
+                    by = c("person" = "_submission__id", "_parent_index" = "_index"))
+  
+  # add any food/serving size combos missing in Heather's file
+  nocal = unique(dat3[is.na(dat3$tot_kcal),c("selected", "serving")])
   nocal$dataset = rep(vargroup, length(nocal$selected))
   
   NA_serving = rbind(NA_serving, nocal)
   
-  assign(indfiles_list_foods[i], dat2)
+  assign(indfiles_list_foods[i], dat3)
   
   
 }
@@ -116,52 +131,68 @@ for (i in 1:length(indfiles_list_foods)){
 NA_serving[!(NA_serving$selected %in% c("coffee", "tea")),]
 
 
-#####################################################
-# Look at oil in sauces
-#####################################################
-# Get list of sauce files
-indfiles_list_sauce <- indfiles_list[grepl("sauce", indfiles_list)]
-saucegroups = gsub("_repeat", "", indfiles_list_sauce)
 
-for (i in 1:length(indfiles_list_sauce)){
-  dat <- get(indfiles_list_sauce[i])
-  saucegroup = saucegroups[i]
+
+
+#####################################################
+# Look at added sugar/dairy in coffee and tea
+#####################################################
+# Get list of  beverage files
+indfiles_list_ct <- c("coff_tea", "coff_tea_outside")
+
+for (i in 1:length(indfiles_list_ct)){
+  dat <- get(indfiles_list_ct[i])
   
-  print(saucegroup)
+  print(indfiles_list_ct[i])
   
-  
-  colnames(dat) <- gsub(paste0(gsub("_outside", "", saucegroup),"_"), "", colnames(dat))
-  colnames(dat) <- gsub("_outside", "", colnames(dat))
-  
-  dat <- dat[dat$selected=="oil",]
+  # create some identifiers
   dat$merge_day = date(dat$`_submission__submission_time`)
   dat$person = dat$`_submission__id`
   dat$person_day = paste0(dat$`_submission__id`, "_", dat$merge_day)
   
-  dat2 <- left_join(dat, nutcomp_long[nutcomp_long$old_group=="added from sauce add ons",], by = c("selected" = "varname", "serving" = "serving")) %>% 
-    select(-c("_parent_table_name", "_submission__id",  "_submission__uuid",            
-              "_submission__validation_status", "_submission__notes", "_submission__submission_time",
-              "_submission__status", "_submission__submitted_by","_submission___version__", "_submission__tags")) %>% 
-    mutate(tot_kcal = serving_size * grams * kcal_100g/100)
-
-  assign(indfiles_list_sauce[i], dat2)
+  # separate indicators for sugar and milk
+  dat$added_sugar <- ifelse(grepl("sugar", dat$sugar_milk), "added sugar", NA)
+  dat$added_milk <- ifelse(grepl("milk", dat$sugar_milk), "added milk", NA)
+  
+  # merge in nutritional data by sugar and by milk
+  dat_sugar <- dat[dat$added_sugar=="added sugar" & !is.na(dat$added_sugar),
+                   c("selected", "serving", "serving_size", "added_sugar", "sugar_serving", "sugar_serving_size", "person", "person_day", "merge_day", "_index", "_parent_index", "_parent_table_name")]
+  dat_milk <- dat[dat$added_milk=="added milk" & !is.na(dat$added_milk),
+                   c("selected", "serving", "serving_size", "added_milk", "milk_serving", "milk_serving_size", "person", "person_day", "merge_day", "_index", "_parent_index", "_parent_table_name")]
+ 
+  dat_sugar2 <- left_join(dat_sugar, nutcomp_long[nutcomp_long$old_group=="added from beverage add ons",], by = c("added_sugar" = "varname", "sugar_serving" = "serving")) %>%
+    mutate(tot_kcal = sugar_serving_size * grams * kcal_100g/100) %>% select("person", "person_day", "merge_day", "old_group", "new_group", "tot_kcal", "_index", "_parent_index", "_parent_table_name")
+  
+  dat_milk2 <- left_join(dat_milk, nutcomp_long[nutcomp_long$old_group=="added from beverage add ons",], by = c("added_milk" = "varname", "milk_serving" = "serving")) %>%
+    mutate(tot_kcal = milk_serving_size * grams * kcal_100g/100) %>% select("person", "person_day", "merge_day", "old_group", "new_group", "tot_kcal", "_index", "_parent_index", "_parent_table_name")
+  
+  # stack them
+  dat2 <- rbind(dat_sugar2, dat_milk2)
+  
+  # add member name
+  dat3 <- left_join(dat2, member[,c("member", "_submission__id", "_index")], 
+                    by = c("person" = "_submission__id", "_parent_index" = "_index"))
+  
+  assign(indfiles_list_ct[i], dat3)
 }
+
 
 #####################################################
 # Get corn/rice data from member file
 #####################################################
-# rice
-mem_rice_in <- member[,c("_submission__id", "_submission__submission_time", 
+### rice
+mem_rice_in <- member[,c("member", "_submission__id", "_submission__submission_time", "_index", "_parent_index", "_parent_table_name",
                            "rice_serving", "rice_serving_size")]
-mem_rice_out <- member[,c("_submission__id", "_submission__submission_time", 
+mem_rice_out <- member[,c("member","_submission__id", "_submission__submission_time", "_index", "_parent_index", "_parent_table_name",
                            "rice_serving_outside", "rice_serving_size_outside")]
 
+# merge in nutritional data
 mem_rice_in2 <- left_join(mem_rice_in[!is.na(mem_rice_in$rice_serving_size),], nutcomp_long[nutcomp_long$varname=="rice",], 
                           by = c("rice_serving" = "serving")) %>%
                           mutate(kcal = rice_serving_size * grams * kcal_100g/100, 
                                   day = date(`_submission__submission_time`), person = `_submission__id`, 
                                  person_day = paste0(`_submission__id`, "_", date(`_submission__submission_time`))) %>%
-                          select(person, day,person_day, new_group,  kcal)
+                          select(person, day,person_day, new_group,  kcal, `_index`, `_parent_index`, `_parent_table_name`, member)
 
 
 mem_rice_out2 <- left_join(mem_rice_out[!is.na(mem_rice_out$rice_serving_size_outside),], nutcomp_long[nutcomp_long$varname=="rice",], 
@@ -169,22 +200,22 @@ mem_rice_out2 <- left_join(mem_rice_out[!is.na(mem_rice_out$rice_serving_size_ou
                           mutate(kcal = rice_serving_size_outside * grams * kcal_100g/100, 
                                  day = date(`_submission__submission_time`), person = `_submission__id`, 
                                  person_day = paste0(`_submission__id`, "_", date(`_submission__submission_time`))) %>%
-                          select(person, day, person_day, new_group, kcal)
+                          select(person, day, person_day, new_group, kcal, `_index`, `_parent_index`, `_parent_table_name`, member)
 
-# Corn
-mem_corn_in <- member[,c("_submission__id", "_submission__submission_time", 
+### Corn
+mem_corn_in <- member[,c("member", "_submission__id", "_submission__submission_time",  "_index", "_parent_index", "_parent_table_name",
                            "corns_serving", "corns_serving_size")]
 
-mem_corn_out <- member[,c("_submission__id", "_submission__submission_time", 
+mem_corn_out <- member[,c("member", "_submission__id", "_submission__submission_time",  "_index", "_parent_index", "_parent_table_name",
                           "corns_serving_outside", "corns_serving_size_outside")]
 
-
+# merge in nutritional data
 mem_corn_in2 <- left_join(mem_corn_in[!is.na(mem_corn_in$corns_serving_size),], nutcomp_long[nutcomp_long$varname=="corns",], 
                           by = c("corns_serving" = "serving")) %>%
                           mutate(kcal = corns_serving_size * grams * kcal_100g/100, 
                                  day = date(`_submission__submission_time`), person = `_submission__id`, 
                                  person_day = paste0(`_submission__id`, "_", date(`_submission__submission_time`))) %>%
-                          select(person, day,person_day, new_group, kcal)
+                          select(person, day,person_day, new_group, kcal, `_index`, `_parent_index`, `_parent_table_name`, member)
 
 
 mem_corn_out2 <- left_join(mem_corn_out[!is.na(mem_corn_out$corns_serving_size_outside),], nutcomp_long[nutcomp_long$varname=="corns",], 
@@ -192,131 +223,252 @@ mem_corn_out2 <- left_join(mem_corn_out[!is.na(mem_corn_out$corns_serving_size_o
                             mutate(kcal = corns_serving_size_outside * grams * kcal_100g/100, 
                                    day = date(`_submission__submission_time`), person = `_submission__id`, 
                                    person_day = paste0(`_submission__id`, "_", date(`_submission__submission_time`))) %>%
-                            select(person, day,person_day, new_group, kcal)
+                            select(person, day,person_day, new_group, kcal, `_index`, `_parent_index`, `_parent_table_name`, member)
 
 
-member_nut = rbind(mem_rice_in2, mem_rice_out2, mem_corn_in2, mem_corn_out2)
+# combine rice/corn data
+member_nut_in = rbind(mem_rice_in2, mem_corn_in2)
+member_nut_out = rbind(mem_rice_out2, mem_corn_out2)
+
 
 
 #####################################################
-# Aggregate kcal by person/day and new group
+# Look at oil in sauces
+#####################################################
+# Get list of sauce files
+
+# Sauces have to be linked to the food file before they can be linked to the member file
+#   Note: rice and corn were not taken via repeating sections, so the rice/corn sauce connects directly to the member file
+# Sauce serving amounts are only available for "inside" foods
+
+indfiles_list_sauce <- indfiles_list[grepl("sauce", indfiles_list)]
+
+#### data not ready yet
+indfiles_list_sauce <- indfiles_list_sauce[!grepl("inverts|fish", indfiles_list_sauce)]
+
+saucegroups = gsub("_repeat", "", indfiles_list_sauce)
+
+# create a dataset to track if any sauces don't link properly to the member file
+missingmember = c()
+
+for (i in 1:length(indfiles_list_sauce)){
+  dat <- get(indfiles_list_sauce[i])
+  saucegroup = saucegroups[i]
+  
+  print(saucegroup)
+  
+  # get the food file for non-rice/corn sauces
+  if(grepl("rice", saucegroup)==F & grepl("corn", saucegroup)==F){
+    food_file =  paste0(gsub("_sauce", "_repeat", gsub("_outside", "", saucegroup),"_"))
+    print(food_file)
+    
+    fooddat <- get(food_file)
+  }
+  
+  
+  colnames(dat) <- gsub(paste0(gsub("_outside", "", saucegroup),"_"), "", colnames(dat))
+  colnames(dat) <- gsub("_outside", "", colnames(dat))
+  
+  # limited sauce data to oil
+  dat <- dat[dat$selected=="oil",]
+  
+  # create some indentifiers
+  dat$merge_day = date(dat$`_submission__submission_time`)
+  dat$person = dat$`_submission__id`
+  dat$person_day = paste0(dat$`_submission__id`, "_", dat$merge_day)
+  
+  # add nutritional data
+  dat2 <- left_join(dat, nutcomp_long[nutcomp_long$old_group=="added from sauce add ons",], by = c("selected" = "varname", "serving" = "serving")) %>% 
+    select(-c("_submission__id",  "_submission__uuid",            
+              "_submission__validation_status", "_submission__notes", "_submission__submission_time",
+              "_submission__status", "_submission__submitted_by","_submission___version__", "_submission__tags")) %>% 
+    mutate(tot_kcal = serving_size * grams * kcal_100g/100)
+  
+  # if rice/corn, can link directlt to member file
+  if(grepl("rice", saucegroup)==T | grepl("corn", saucegroup)==T){
+    dat3 <- dat2
+  }
+  
+  # if not, have to link sauce to food file before linking to the member file
+  else{
+    dat2 <- dat2 %>% select(-c("_index")) %>% rename("sauce_index" = "_parent_index")
+    dat3 <- left_join(dat2, fooddat[,c("person", "_index", "_parent_index")], 
+                      by = c("person" = "person", "sauce_index" = "_index"))
+  }
+  
+  # add member name
+  dat4 <- left_join(dat3, member[,c("member", "_submission__id", "_index")], 
+                    by = c("person" = "_submission__id", "_parent_index" = "_index"))
+  
+  missingmember <- rbind(missingmember, dat4[is.na(dat4$member),])
+  
+  assign(indfiles_list_sauce[i], dat4)
+}
+
+#####################################################
+# Aggregate kcal by person/day and new group (INSIDE)
 #####################################################
 
 #### either don't include or must be treated differently
-indfiles_list_foods <- indfiles_list[!grepl("member|fishing_area|guest|main|occupation|condiment", indfiles_list)]
+inside_list_foods <- c(indfiles_list[!grepl("member|fishing_area|guest|main|occupation|condiment|outside", indfiles_list)], "coff_tea")
 #### data not ready yet
-indfiles_list_foods <- indfiles_list_foods[!grepl("inverts|fish", indfiles_list_foods)]
+inside_list_foods <- inside_list_foods[!grepl("inverts|fish", inside_list_foods)]
 
-vargroups = gsub("_repeat", "", indfiles_list_foods)
+vargroups = gsub("_repeat", "", inside_list_foods)
 
-aggregated = data.frame(person = NA, day = NA, person_day = NA, new_group = NA, kcal = NA)
+inside_aggregated = data.frame(person = NA, member = NA, day = NA, person_day = NA, new_group = NA, kcal = NA)
 
-for (i in 1:length(indfiles_list_foods)){
-  dat <- get(indfiles_list_foods[i])
+# aggregate new food groups across datasets
+for (i in 1:length(inside_list_foods)){
+  dat <- get(inside_list_foods[i])
   vargroup = vargroups[i]
   
   print(vargroup)
 
-  new <- aggregate(dat$tot_kcal, by = list(dat$person, dat$merge_day, dat$person_day, dat$new_group), FUN="sum")
-  colnames(new) = c('person', 'day', 'person_day', 'new_group', 'kcal')
-  aggregated <- rbind(aggregated, new)
+  new <- aggregate(dat$tot_kcal, by = list(dat$person, dat$member, dat$merge_day, dat$person_day, dat$new_group), FUN="sum")
+  colnames(new) = c('person', 'member', 'day', 'person_day', 'new_group', 'kcal')
+  inside_aggregated <- rbind(inside_aggregated, new) %>% arrange(person, member, day)
 }
 
-aggregated <- rbind(aggregated, member_nut)
+# have to add in the corn/rice data here
+inside_aggregated <- rbind(inside_aggregated, member_nut_in[,c("person", "member", "day", "person_day", "new_group", "kcal")])
+
+# Aggregate again to collect same group across datasets now that corn/rice is added
+inside_aggregated2 <- aggregate(inside_aggregated$kcal, by = list(inside_aggregated$person, inside_aggregated$member, as.Date(inside_aggregated$day), inside_aggregated$person_day, inside_aggregated$new_group), FUN="sum")
+colnames(inside_aggregated2) = c('person', 'member', 'day', 'person_day', 'new_group', 'kcal')
+
+# sort by person
+inside_aggregated2 <- inside_aggregated2 %>% arrange(person, member, day)
+
+# change to wide format
+inside_aggregated_wide <- inside_aggregated2[!(is.na(inside_aggregated2$person_day)),] %>%
+  pivot_wider(id_cols = c('person', 'member', 'day', 'person_day'), names_from = new_group, values_from = kcal, names_glue = "{new_group}_kcal") %>%
+  arrange(person, member, day)
+
+
+# two food preparers are not in the aggregated data; one didn't report any food. One reported only tubers but wasn't
+# present in the tubers data (so they have no nutritional data available)
+#foodpreppers <- member[!is.na(member$food_preparer) & member$food_preparer=="yes", c("member", "_submission__submission_time", "_submission__id", "_index")] %>% arrange(member, `_submission__submission_time`)
+
+#inwide <- unique(inside_aggregated_wide$member)
+#allprep <- unique(foodpreppers$member)
+
+#allprep[!(allprep %in% inwide)]
+
+#look <- member[member$member %in% c("francia_f_2012", "nenisoa_f_1995"),]
+
+#tubers_repeat[tubers_repeat$`_submission__id` %in% look$`_submission__id`,]
+
+
+#####################################################
+# Aggregate kcal by person/day and new group (OUTSIDE)
+#####################################################
+
+#### either don't include or must be treated differently
+outside_list_foods <- c(indfiles_list[grepl("outside", indfiles_list)], "coff_tea_outside")
+#### data not ready yet
+outside_list_foods <- outside_list_foods[!grepl("inverts|fish", outside_list_foods)]
+
+vargroups = gsub("_repeat", "", outside_list_foods)
+
+outside_aggregated = data.frame(person = NA, member = NA, day = NA, person_day = NA, new_group = NA, kcal = NA)
+
+for (i in 1:length(outside_list_foods)){
+  dat <- get(outside_list_foods[i])
+  vargroup = vargroups[i]
+  
+  print(vargroup)
+  
+  new <- aggregate(dat$tot_kcal, by = list(dat$person, dat$member, dat$merge_day, dat$person_day, dat$new_group), FUN="sum")
+  colnames(new) = c('person', 'member', 'day', 'person_day', 'new_group', 'kcal')
+  outside_aggregated <- rbind(outside_aggregated, new)
+}
+
+outside_aggregated <- rbind(outside_aggregated, member_nut_out[,c('person', 'member', 'day', 'person_day', 'new_group', 'kcal')])
 
 # Aggregate again to collect same group across datasets
-aggregated2 <- aggregate(aggregated$kcal, by = list(aggregated$person, as.Date(aggregated$day), aggregated$person_day, aggregated$new_group), FUN="sum")
-colnames(aggregated2) = c('person', 'day', 'person_day', 'new_group', 'kcal')
+outside_aggregated2 <- aggregate(outside_aggregated$kcal, by = list(outside_aggregated$person, outside_aggregated$member, as.Date(outside_aggregated$day), outside_aggregated$person_day, outside_aggregated$new_group), FUN="sum")
+colnames(outside_aggregated2) = c('person', 'member', 'day', 'person_day', 'new_group', 'kcal')
 
 
-agg_wide <- aggregated2[!(is.na(aggregated2$person_day)),] %>%
-  pivot_wider(id_cols = c('person', 'day', 'person_day'), names_from = new_group, values_from = kcal, names_glue = "{new_group}_kcal") 
+outside_aggregated_wide <- outside_aggregated2[!(is.na(outside_aggregated2$person_day)),] %>%
+  pivot_wider(id_cols = c('person', 'member', 'day', 'person_day'), names_from = new_group, values_from = kcal, names_glue = "{new_group}_kcal") %>%
+  arrange(person, member, day)
 
 
 
-######## Add in other variables
-# Note: only nutrition data if the person is a food preparer
+#####################################################
+# Add in other variables (INSIDE)
+#####################################################
 
 #### Guest data:
-guest <- guest_repeat[, c("_submission__id", "_submission__submission_time", "guest_sex", "guest_age")] %>%
-  group_by(`_submission__id`, `_submission__submission_time`) %>%
+guest <- guest_repeat[, c("_submission__id", "_submission__submission_time", "guest_sex", "guest_age", "_parent_index")] %>%
+  group_by(`_submission__id`, `_submission__submission_time`, `_parent_index`) %>%
   mutate(guest_num = row_number()) %>%
   ungroup()
 
-colnames(guest) <- c("person", "day", "sex", "age", "guest_num")
+guest$guest_age <- ifelse(guest$guest_age %in% c("1318", "1318.0", "13_18"), "13-18", 
+                          ifelse(guest$guest_age %in% c("612", "612.0"), "6-12", 
+                                 ifelse(guest$guest_age == "5.0", "5", guest$guest_age)))
+
+colnames(guest) <- c("person", "day", "sex", "age", "_parent_index", "guest_num")
+
+# add member data
+guest2 <- left_join(guest, member[,c("member", "_submission__id", "_index")], 
+                    by = c("person" = "_submission__id", "_parent_index" = "_index"))
 
 # Reshape the dataset into wide format
-guest_wide <- guest %>%
+guest_wide <- guest2 %>%
   pivot_wider(
     names_from = guest_num, 
     values_from = c(age, sex),
     names_glue = "guest{guest_num}_{.value}"
-  )
+  ) %>% arrange(member, person, day)
 
 guest_wide$day <- as.Date(guest_wide$day)
 
-###
-add_dat <- agg_wide %>%
+### Add to "inside" food file
+# add household name, collection wave, etc from main file
+add_inside <- inside_aggregated_wide %>%
   left_join(main[,c("_id", "start", "_submission_time", "village", "hh_name", "list_member", "collection_wave")], by = c("person" = "_id")) %>%
   filter(as.Date(day) >= as.Date(start) & as.Date(day) <= as.Date(`_submission_time`))
 
-add_dat2 <- add_dat %>%
-  left_join(guest_wide, by = c("person", "day"))
+# add guest data
+add_inside2 <- add_inside %>%
+  left_join(guest_wide, by = c("person", "member", "day"))
+
+# add data from the member file
+food_preppers <- member[!is.na(member$food_preparer) & member$food_preparer == "yes",c("_submission__id", "_submission__submission_time", "member", "food_preparer","special_day", "nb_people_eating", "member_eating", "guest", "nb_guests_eating")]
+food_preppers$day <- as.Date(food_preppers$`_submission__submission_time`)
+
+add_inside3 <- add_inside2 %>%
+                left_join(food_preppers, by = c("person" = "_submission__id", "member" = "member", "day" = "day")) %>% arrange(person, day)
+
+# households with 2 food preparers
+duplicated <- add_inside3[duplicated(add_inside3$person_day),]
+duplicated_all <- add_inside3[add_inside3$person_day %in% duplicated$person_day,]
 
 
-add_dat3 <- add_dat2 %>%
-  left_join(member[,c("_submission__id", "_submission__submission_time", "member", "food_preparer","special_day", "nb_people_eating", "member_eating", "guest", "nb_guests_eating")],
-            by = c("person" = "_submission__id")) %>% 
-            filter(day == as.Date(`_submission__submission_time`))
+# final data
+nutrition_data_household <- add_inside3 %>%
+  select(person, day, person_day, collection_wave, village, hh_name, list_member, member, food_preparer, special_day, nb_people_eating, member_eating, guest, nb_guests_eating, everything()) %>%
+  select(-c("_submission__submission_time", "_submission_time", "start")) %>%
+  arrange(person, member, day)
 
-nutrition_data <- add_dat3 %>%
-  select(person, day, person_day, village, hh_name, list_member, member, food_preparer, everything())
-
-
-
-save(nutrition_data, file = here("NutritionComp", "nutrition_data.RData"))
-
-
-
-### NOT DONE YET
 
 #####################################################
-# Look at added sugar/dairy in beverages
+# Add in other variables (OUTSIDE)
 #####################################################
-# Get list of  beverage files
-indfiles_list_bev <- indfiles_list[grepl("beverage", indfiles_list)]
-bevgroups = gsub("_repeat", "", indfiles_list_bev)
 
-for (i in 1:length(indfiles_list_bev)){
-  dat <- get(indfiles_list_bev[i])
-  bevgroup = bevgroups[i]
-  
-  print(bevgroup)
-  
-  coff_tea <- dat[dat$selected %in% c("coffee", "tea"),]
-  other <- dat[!(dat$selected %in% c("coffee", "tea")),]
-  
-  colnames(coff_tea) <- gsub(paste0(gsub("_outside", "", bevgroup),"_"), "", colnames(coff_tea))
-  colnames(coff_tea) <- gsub("_outside", "", colnames(coff_tea))
-  
-  coff_tea$added_sugar <- ifelse(grepl("sugar", coff_tea$sugar_milk), "added sugar", NA)
-  coff_tea$added_milk <- ifelse(grepl("milk", coff_tea$sugar_milk), "added milk", NA)
-  
-  #coff_tea <- coff_tea %>% select(-c("serving_size", "grams", "kcal_100g", "new_group", "old_group", "eng_name"))
-  
-  #coff_tea2 <- left_join(coff_tea, nutcomp_long[nutcomp_long$old_group=="added from beverage add ons",], by = c("added_sugar" = "varname", "sugar_serving" = "serving")) #%>% 
-    #mutate(tot_kcal_addedsugar = serving_size * grams * kcal_100g/100)
-  
-  #coff_tea3 <- left_join(coff_tea2, nutcomp_long[nutcomp_long$old_group=="added from beverage add ons",], by = c("added_milk" = "varname", "milk_serving" = "serving")) #%>% 
-    #mutate(tot_kcal_addedmilk = serving_size * grams * kcal_100g/100)
-  
-  #dat2 <- rbind(other, coff_tea3)
-  
-  #assign(indfiles_list_bev[i], dat2)
-}
-
-nutcomp_long[nutcomp_long$old_group=="added from beverage add ons",]
+# add in household name, collection wave, etc from main file
+nutrition_data_outside <- outside_aggregated_wide %>%
+  left_join(main[,c("_id", "start", "_submission_time", "village", "hh_name", "list_member", "collection_wave")], by = c("person" = "_id")) %>%
+  filter(as.Date(day) >= as.Date(start) & as.Date(day) <= as.Date(`_submission_time`)) %>% select(-c(start, `_submission_time`)) %>%
+  select(person, day, person_day, collection_wave, village, hh_name, list_member, member, everything())
 
 
-
-try <- left_join(beverage_repeat, nutcomp_long[nutcomp_long$old_group=="added from beverage add ons",], by = c("added_sugar" = "varname", "sugar_serving" = "serving")) #
+#####################################################
+# Save data
+#####################################################
+save(nutrition_data_household, file = here("NutritionComp", "nutrition_data_household.RData"))
+save(nutrition_data_outside, file = here("NutritionComp", "nutrition_data_outside.RData"))

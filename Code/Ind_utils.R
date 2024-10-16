@@ -87,7 +87,8 @@ load_ARMSData <- function(dd_file, translate_file, list_files, timepoint){
   ## Define 'hallmark' variables - i.e., variables only contained in that dataset that identify what it is
   ## Create true/false variables that identify which of the hallmark variables they contain
   ## Use regex "\\b" to indicate start/end of word so that bread_selected isn't indicated for bread_selected_outside (etc)
-  df_sets3 <- df_sets2 %>% mutate(beans_sauce_repeat = grepl("beans_sauce_selected", df_sets2$vars),
+  df_sets3 <- df_sets2 %>% mutate(beans_sauce_repeat = grepl("\\bbeans_sauce_selected\\b", df_sets2$vars),
+                                  beans_sauce_outside_repeat = grepl("beans_sauce_selected_outside", df_sets2$vars),
                                   beans_repeat = grepl("\\bbeans_selected\\b", df_sets2$vars),
                                   beans_outside_repeat = grepl("beans_selected_outside", df_sets2$vars),
                                   beverage_repeat = grepl("\\bbeverage_selected\\b", df_sets2$vars),
@@ -99,20 +100,24 @@ load_ARMSData <- function(dd_file, translate_file, list_files, timepoint){
                                   dairy_repeat = grepl("\\bdiary_selected\\b", df_sets2$vars),
                                   dairy_outside_repeat = grepl("diary_selected_outside", df_sets2$vars),
                                   fat_food_repeat = grepl("fat_food_selected", df_sets2$vars),
-                                  fish_sauce_repeat = grepl("fish_sauce_selected", df_sets2$vars),
+                                  fish_sauce_repeat = grepl("\\bfish_sauce_selected\\b", df_sets2$vars),
+                                  fish_sauce_outside_repeat = grepl("fish_sauce_selected_outside", df_sets2$vars),
                                   fish_repeat = grepl("\\bfish_selected\\b", df_sets2$vars),
                                   fish_outside_repeat = grepl("fish_selected_outside", df_sets2$vars),
                                   fishing_area_repeat = grepl("fishing_area", df_sets2$vars),
                                   fruits_repeat = grepl("\\bfruits_selected\\b", df_sets2$vars),
                                   fruits_outside_repeat = grepl("fruits_selected_outside", df_sets2$vars),
-                                  greens_sauce_repeat = grepl("greens_sauce_selected", df_sets2$vars),
+                                  greens_sauce_repeat = grepl("\\bgreens_sauce_selected\\b", df_sets2$vars),
+                                  greens_sauce_outside_repeat = grepl("greens_sauce_selected_outside", df_sets2$vars),
                                   greens_repeat = grepl("\\bgreens_selected\\b", df_sets2$vars),
                                   greens_outside_repeat = grepl("greens_selected_outside", df_sets2$vars),
                                   guest_repeat = grepl("guest_sex", df_sets2$vars),
-                                  marine_inverts_sauce_repeat = grepl("marine_inverts_sauce_selected", df_sets2$vars),
+                                  marine_inverts_sauce_repeat = grepl("\\bmarine_inverts_sauce_selected\\b", df_sets2$vars),
+                                  marine_inverts_sauce_outside_repeat = grepl("marine_inverts_sauce_selected_outside", df_sets2$vars),
                                   marine_inverts_repeat = grepl("\\bmarine_inverts_selected\\b", df_sets2$vars),
                                   marine_inverts_outside_repeat = grepl("marine_inverts_selected_outside", df_sets2$vars),
-                                  meat_sauce_repeat = grepl("meat_sauce_selected", df_sets2$vars),
+                                  meat_sauce_repeat = grepl("\\bmeat_sauce_selected\\b", df_sets2$vars),
+                                  meat_sauce_outside_repeat = grepl("meat_sauce_selected_outside", df_sets2$vars),
                                   meat_repeat = grepl("\\bmeat_selected\\b", df_sets2$vars),
                                   meat_outside_repeat = grepl("meat_selected_outside", df_sets2$vars),
                                   member = grepl("death_cause", df_sets2$vars),
@@ -122,19 +127,22 @@ load_ARMSData <- function(dd_file, translate_file, list_files, timepoint){
                                   snacks_outside_repeat = grepl("snacks_selected_outside", df_sets2$vars),
                                   main = grepl("today", df_sets2$vars),
                                   tubers_repeat = grepl("\\btype_tubers\\b", df_sets2$vars),
-                                  tubers_sauce_repeat = grepl("tubers_sauce_selected", df_sets2$vars),
+                                  tubers_sauce_repeat = grepl("\\btubers_sauce_selected\\b", df_sets2$vars),
+                                  tubers_sauce_outside_repeat = grepl("tubers_sauce_selected_outside", df_sets2$vars),
                                   tubers_outside_repeat = grepl("type_tubers_outside", df_sets2$vars),
-                                  vegetables_sauce_repeat = grepl("vegetables_sauce_selected", df_sets2$vars),
+                                  vegetables_sauce_repeat = grepl("\\bvegetables_sauce_selected\\b", df_sets2$vars),
+                                  vegetables_sauce_outside_repeat = grepl("vegetables_sauce_selected_outside", df_sets2$vars),
                                   vegetables_repeat = grepl("\\bvegetables_selected\\b", df_sets2$vars),
                                   vegetables_outside_repeat = grepl("vegetables_selected_outside", df_sets2$vars)) %>%
-    mutate(sum_ds = beans_sauce_repeat + beans_repeat + beans_outside_repeat + beverage_repeat + beverage_outside_repeat + bread_repeat + 
+    mutate(sum_ds = beans_sauce_repeat +  beans_sauce_outside_repeat + beans_repeat + beans_outside_repeat + beverage_repeat + beverage_outside_repeat + bread_repeat + 
            bread_outside_repeat + condiment_repeat + corn_sauce_repeat + dairy_repeat + dairy_outside_repeat  + 
-           fat_food_repeat + fish_sauce_repeat + fish_repeat + fish_outside_repeat + fishing_area_repeat + 
+           fat_food_repeat + fish_sauce_repeat + fish_sauce_outside_repeat + fish_repeat + fish_outside_repeat + fishing_area_repeat + 
            fruits_repeat + fruits_outside_repeat + greens_sauce_repeat + greens_repeat + greens_outside_repeat + guest_repeat + 
-           marine_inverts_sauce_repeat + marine_inverts_repeat + marine_inverts_outside_repeat +  meat_sauce_repeat + meat_repeat + meat_outside_repeat +
+           marine_inverts_sauce_repeat + marine_inverts_sauce_outside_repeat + marine_inverts_repeat + marine_inverts_outside_repeat +  
+           meat_sauce_repeat + meat_sauce_outside_repeat + meat_repeat + meat_outside_repeat +
            member + occupation_repeat + rice_sauce_repeat + snacks_repeat + snacks_outside_repeat + 
-           main + tubers_repeat + tubers_sauce_repeat + tubers_outside_repeat + vegetables_sauce_repeat  + 
-           vegetables_repeat + vegetables_outside_repeat
+           main + tubers_repeat + tubers_sauce_repeat + tubers_sauce_outside_repeat + tubers_outside_repeat + vegetables_sauce_repeat  + 
+           vegetables_sauce_outside_repeat  +vegetables_repeat + vegetables_outside_repeat
     ) #sum to make sure the variable is unique (these should all equal 1)
   # Check the sum variable
   if (length(df_sets3$vars[df_sets3$sum_ds != 1]) != 0) {
